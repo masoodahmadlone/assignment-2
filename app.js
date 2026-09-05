@@ -1,516 +1,762 @@
 (function () {
-'use strict';
-
-```
-angular
-    .module('ShoppingListCheckOff', [])
-    .controller('ShoppingController', ShoppingController)
-    .service('ShoppingListService', ShoppingListService);
+    'use strict';
 
 
-/*
-==================================================
-SHOPPING CONTROLLER
-==================================================
-*/
-
-ShoppingController.$inject = ['ShoppingListService'];
-
-function ShoppingController(ShoppingListService) {
-
-    var shop = this;
-
-
-    // Load saved data from the service
-    shop.toBuyItems = ShoppingListService.getToBuyItems();
-    shop.boughtItems = ShoppingListService.getBoughtItems();
-
-
-    // New item object
-    shop.newItem = {
-        name: '',
-        quantity: 1
-    };
-
-
-    // Error message
-    shop.errorMessage = '';
+    angular
+        .module('ShoppingListCheckOff', [])
+        .controller('ShoppingController', ShoppingController)
+        .service('ShoppingListService', ShoppingListService);
 
 
     /*
-    ------------------------------------------------
-    ADD NEW ITEM
-    ------------------------------------------------
+    ==========================================
+    CONTROLLER
+    ==========================================
     */
 
-    shop.addItem = function () {
+    ShoppingController.$inject = ['ShoppingListService'];
 
-        var name = shop.newItem.name;
-        var quantity = shop.newItem.quantity;
+    function ShoppingController(ShoppingListService) {
 
-
-        // Clear old error message
-        shop.errorMessage = '';
+        var shop = this;
 
 
-        // Validate item name
-        if (!name || name.trim() === '') {
+        /*
+        ------------------------------------------
+        CURRENT DATE
+        ------------------------------------------
+        */
 
-            shop.errorMessage =
-                'Please enter an item name.';
-
-            return;
-        }
-
-
-        // Default quantity to 1
-        if (!quantity) {
-            quantity = 1;
-        }
+        shop.currentDate = new Date();
 
 
-        // Validate quantity
-        if (quantity < 1) {
+        /*
+        ------------------------------------------
+        LOAD DATA
+        ------------------------------------------
+        */
 
-            shop.errorMessage =
-                'Quantity must be at least 1.';
+        shop.toBuyItems =
+            ShoppingListService.getToBuyItems();
 
-            return;
-        }
+        shop.boughtItems =
+            ShoppingListService.getBoughtItems();
 
-
-        // Add item through the service
-        ShoppingListService.addItem(
-            name.trim(),
-            Number(quantity)
-        );
+        shop.shoppingHistory =
+            ShoppingListService.getShoppingHistory();
 
 
-        // Reset form
+        /*
+        ------------------------------------------
+        NEW ITEM
+        ------------------------------------------
+        */
+
         shop.newItem = {
             name: '',
             quantity: 1
         };
 
-    };
+
+        shop.errorMessage = '';
 
 
-    /*
-    ------------------------------------------------
-    MARK ITEM AS BOUGHT
-    ------------------------------------------------
-    */
+        /*
+        ==========================================
+        ADD ITEM
+        ==========================================
+        */
 
-    shop.markAsBought = function (index) {
+        shop.addItem = function () {
 
-        ShoppingListService.markAsBought(index);
+            shop.errorMessage = '';
 
-    };
-
-
-    /*
-    ------------------------------------------------
-    UNDO PURCHASE
-    ------------------------------------------------
-    */
-
-    shop.undoBought = function (index) {
-
-        ShoppingListService.undoBought(index);
-
-    };
+            var name = shop.newItem.name;
+            var quantity = shop.newItem.quantity;
 
 
-    /*
-    ------------------------------------------------
-    DELETE FROM TO BUY LIST
-    ------------------------------------------------
-    */
+            if (!name || name.trim() === '') {
 
-    shop.deleteToBuyItem = function (index) {
+                shop.errorMessage =
+                    'Please enter an item name.';
 
-        ShoppingListService.deleteToBuyItem(index);
-
-    };
+                return;
+            }
 
 
-    /*
-    ------------------------------------------------
-    DELETE FROM BOUGHT LIST
-    ------------------------------------------------
-    */
+            if (!quantity) {
 
-    shop.deleteBoughtItem = function (index) {
+                quantity = 1;
 
-        ShoppingListService.deleteBoughtItem(index);
-
-    };
+            }
 
 
-    /*
-    ------------------------------------------------
-    CLEAR ALL SHOPPING DATA
-    ------------------------------------------------
-    */
+            quantity = Number(quantity);
 
-    shop.clearAll = function () {
 
-        var confirmClear =
-            window.confirm(
-                'Are you sure you want to clear your entire shopping list?'
+            if (quantity < 1) {
+
+                shop.errorMessage =
+                    'Quantity must be at least 1.';
+
+                return;
+            }
+
+
+            ShoppingListService.addItem(
+                name.trim(),
+                quantity
             );
 
-        if (confirmClear) {
 
-            ShoppingListService.clearAll();
-
-        }
-
-    };
-
-}
-
-
-/*
-==================================================
-SHOPPING LIST SERVICE
-==================================================
-*/
-
-function ShoppingListService() {
-
-    var service = this;
-
-
-    // LocalStorage key
-    var STORAGE_KEY = 'myShoppingList';
-
-
-    /*
-    ------------------------------------------------
-    LOAD DATA FROM LOCALSTORAGE
-    ------------------------------------------------
-    */
-
-    var savedData =
-        localStorage.getItem(STORAGE_KEY);
-
-
-    var data;
-
-
-    try {
-
-        data = savedData
-            ? JSON.parse(savedData)
-            : {
-                toBuyItems: [],
-                boughtItems: []
+            shop.newItem = {
+                name: '',
+                quantity: 1
             };
 
-    }
-    catch (error) {
+        };
 
-        data = {
-            toBuyItems: [],
-            boughtItems: []
+
+        /*
+        ==========================================
+        MARK AS BOUGHT
+        ==========================================
+        */
+
+        shop.markAsBought = function (index) {
+
+            ShoppingListService.markAsBought(index);
+
+        };
+
+
+        /*
+        ==========================================
+        UNDO BOUGHT ITEM
+        ==========================================
+        */
+
+        shop.undoBought = function (index) {
+
+            ShoppingListService.undoBought(index);
+
+        };
+
+
+        /*
+        ==========================================
+        DELETE FROM TO BUY
+        ==========================================
+        */
+
+        shop.deleteToBuyItem = function (index) {
+
+            ShoppingListService.deleteToBuyItem(index);
+
+        };
+
+
+        /*
+        ==========================================
+        DELETE FROM BOUGHT
+        ==========================================
+        */
+
+        shop.deleteBoughtItem = function (index) {
+
+            ShoppingListService.deleteBoughtItem(index);
+
+        };
+
+
+        /*
+        ==========================================
+        COMPLETE SHOPPING
+        ==========================================
+        */
+
+        shop.completeShopping = function () {
+
+            if (shop.boughtItems.length === 0) {
+
+                return;
+
+            }
+
+
+            var confirmed = window.confirm(
+                'Complete this shopping trip and save it to your shopping history?'
+            );
+
+
+            if (!confirmed) {
+
+                return;
+
+            }
+
+
+            ShoppingListService.completeShopping();
+
+
+            shop.newItem = {
+                name: '',
+                quantity: 1
+            };
+
+        };
+
+
+        /*
+        ==========================================
+        DELETE HISTORY RECORD
+        ==========================================
+        */
+
+        shop.deleteRecord = function (index) {
+
+            var confirmed = window.confirm(
+                'Are you sure you want to delete this shopping record?'
+            );
+
+
+            if (confirmed) {
+
+                ShoppingListService.deleteRecord(index);
+
+            }
+
+        };
+
+
+        /*
+        ==========================================
+        DOWNLOAD PDF
+        ==========================================
+        */
+
+        shop.downloadPDF = function (record) {
+
+            if (
+                !window.jspdf ||
+                !window.jspdf.jsPDF
+            ) {
+
+                alert(
+                    'PDF library could not be loaded. Please check your internet connection.'
+                );
+
+                return;
+
+            }
+
+
+            var jsPDF =
+                window.jspdf.jsPDF;
+
+
+            var doc =
+                new jsPDF();
+
+
+            var pageWidth =
+                doc.internal.pageSize.getWidth();
+
+
+            var y = 20;
+
+
+            /*
+            TITLE
+            */
+
+            doc.setFontSize(20);
+
+            doc.text(
+                'Shopping Record',
+                pageWidth / 2,
+                y,
+                {
+                    align: 'center'
+                }
+            );
+
+
+            y += 15;
+
+
+            doc.setFontSize(12);
+
+
+            /*
+            DATE
+            */
+
+            var completedDate =
+                new Date(record.completedDate);
+
+
+            doc.text(
+                'Shopping Date: ' +
+                completedDate.toLocaleDateString(),
+                20,
+                y
+            );
+
+
+            y += 8;
+
+
+            doc.text(
+                'Completed Time: ' +
+                completedDate.toLocaleTimeString(),
+                20,
+                y
+            );
+
+
+            y += 15;
+
+
+            /*
+            ITEMS HEADER
+            */
+
+            doc.setFontSize(14);
+
+            doc.text(
+                'Purchased Items',
+                20,
+                y
+            );
+
+
+            y += 10;
+
+
+            doc.setFontSize(11);
+
+
+            /*
+            LIST ITEMS
+            */
+
+            for (
+                var i = 0;
+                i < record.items.length;
+                i++
+            ) {
+
+                var item =
+                    record.items[i];
+
+
+                var text =
+                    (i + 1) +
+                    '. ' +
+                    item.name +
+                    ' - Quantity: ' +
+                    item.quantity;
+
+
+                /*
+                NEW PAGE IF NEEDED
+                */
+
+                if (y > 270) {
+
+                    doc.addPage();
+
+                    y = 20;
+
+                }
+
+
+                doc.text(
+                    text,
+                    25,
+                    y
+                );
+
+
+                y += 8;
+
+            }
+
+
+            y += 10;
+
+
+            doc.setFontSize(12);
+
+
+            doc.text(
+                'Total Items: ' +
+                record.items.length,
+                20,
+                y
+            );
+
+
+            /*
+            SAVE PDF
+            */
+
+            var fileDate =
+                completedDate
+                    .toISOString()
+                    .split('T')[0];
+
+
+            doc.save(
+                'Shopping_Record_' +
+                fileDate +
+                '.pdf'
+            );
+
         };
 
     }
 
 
-    // Make sure arrays exist
-    if (!Array.isArray(data.toBuyItems)) {
-
-        data.toBuyItems = [];
-
-    }
-
-    if (!Array.isArray(data.boughtItems)) {
-
-        data.boughtItems = [];
-
-    }
-
-
-    // Main arrays
-    service.toBuyItems = data.toBuyItems;
-    service.boughtItems = data.boughtItems;
-
-
     /*
-    ------------------------------------------------
-    SAVE DATA TO LOCALSTORAGE
-    ------------------------------------------------
+    ==========================================
+    SERVICE
+    ==========================================
     */
 
-    service.saveData = function () {
+    function ShoppingListService() {
 
-        var shoppingData = {
+        var service = this;
 
-            toBuyItems: service.toBuyItems,
 
-            boughtItems: service.boughtItems
+        var STORAGE_KEY =
+            'completeShoppingApplication';
+
+
+        /*
+        ==========================================
+        LOAD SAVED DATA
+        ==========================================
+        */
+
+        var savedData =
+            localStorage.getItem(STORAGE_KEY);
+
+
+        var data;
+
+
+        try {
+
+            data = savedData
+                ? JSON.parse(savedData)
+                : {
+                    toBuyItems: [],
+                    boughtItems: [],
+                    shoppingHistory: []
+                };
+
+        }
+        catch (error) {
+
+            data = {
+                toBuyItems: [],
+                boughtItems: [],
+                shoppingHistory: []
+            };
+
+        }
+
+
+        /*
+        MAKE SURE ARRAYS EXIST
+        */
+
+        service.toBuyItems =
+            Array.isArray(data.toBuyItems)
+                ? data.toBuyItems
+                : [];
+
+
+        service.boughtItems =
+            Array.isArray(data.boughtItems)
+                ? data.boughtItems
+                : [];
+
+
+        service.shoppingHistory =
+            Array.isArray(data.shoppingHistory)
+                ? data.shoppingHistory
+                : [];
+
+
+        /*
+        ==========================================
+        SAVE DATA
+        ==========================================
+        */
+
+        service.saveData = function () {
+
+            var dataToSave = {
+
+                toBuyItems:
+                    service.toBuyItems,
+
+                boughtItems:
+                    service.boughtItems,
+
+                shoppingHistory:
+                    service.shoppingHistory
+
+            };
+
+
+            localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify(dataToSave)
+            );
 
         };
 
 
-        localStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify(shoppingData)
-        );
+        /*
+        ==========================================
+        GETTERS
+        ==========================================
+        */
 
-    };
+        service.getToBuyItems = function () {
 
-
-    /*
-    ------------------------------------------------
-    GET TO BUY ITEMS
-    ------------------------------------------------
-    */
-
-    service.getToBuyItems = function () {
-
-        return service.toBuyItems;
-
-    };
-
-
-    /*
-    ------------------------------------------------
-    GET BOUGHT ITEMS
-    ------------------------------------------------
-    */
-
-    service.getBoughtItems = function () {
-
-        return service.boughtItems;
-
-    };
-
-
-    /*
-    ------------------------------------------------
-    ADD ITEM
-    ------------------------------------------------
-    */
-
-    service.addItem = function (name, quantity) {
-
-        var newItem = {
-
-            id: Date.now(),
-
-            name: name,
-
-            quantity: quantity
+            return service.toBuyItems;
 
         };
 
 
-        service.toBuyItems.push(newItem);
+        service.getBoughtItems = function () {
+
+            return service.boughtItems;
+
+        };
 
 
-        service.saveData();
+        service.getShoppingHistory = function () {
 
-    };
+            return service.shoppingHistory;
+
+        };
 
 
-    /*
-    ------------------------------------------------
-    MOVE ITEM TO BOUGHT LIST
-    ------------------------------------------------
-    */
+        /*
+        ==========================================
+        ADD ITEM
+        ==========================================
+        */
 
-    service.markAsBought = function (index) {
-
-        if (
-            index < 0 ||
-            index >= service.toBuyItems.length
+        service.addItem = function (
+            name,
+            quantity
         ) {
-            return;
-        }
 
+            var item = {
 
-        var item =
-            service.toBuyItems.splice(index, 1)[0];
+                id:
+                    Date.now() +
+                    Math.floor(Math.random() * 1000),
 
+                name:
+                    name,
 
-        service.boughtItems.push(item);
+                quantity:
+                    quantity,
 
+                addedDate:
+                    new Date().toISOString()
 
-        service.saveData();
+            };
 
-    };
 
+            service.toBuyItems.push(item);
 
-    /*
-    ------------------------------------------------
-    MOVE ITEM BACK TO TO BUY LIST
-    ------------------------------------------------
-    */
 
-    service.undoBought = function (index) {
+            service.saveData();
 
-        if (
-            index < 0 ||
-            index >= service.boughtItems.length
-        ) {
-            return;
-        }
+        };
 
 
-        var item =
-            service.boughtItems.splice(index, 1)[0];
+        /*
+        ==========================================
+        MARK AS BOUGHT
+        ==========================================
+        */
 
+        service.markAsBought = function (index) {
 
-        service.toBuyItems.push(item);
+            if (
+                index < 0 ||
+                index >= service.toBuyItems.length
+            ) {
 
+                return;
 
-        service.saveData();
+            }
 
-    };
 
+            var item =
+                service.toBuyItems
+                    .splice(index, 1)[0];
 
-    /*
-    ------------------------------------------------
-    DELETE TO BUY ITEM
-    ------------------------------------------------
-    */
 
-    service.deleteToBuyItem = function (index) {
+            item.boughtDate =
+                new Date().toISOString();
 
-        if (
-            index < 0 ||
-            index >= service.toBuyItems.length
-        ) {
-            return;
-        }
 
+            service.boughtItems.push(item);
 
-        service.toBuyItems.splice(index, 1);
 
+            service.saveData();
 
-        service.saveData();
+        };
 
-    };
 
+        /*
+        ==========================================
+        UNDO BOUGHT
+        ==========================================
+        */
 
-    /*
-    ------------------------------------------------
-    DELETE BOUGHT ITEM
-    ------------------------------------------------
-    */
+        service.undoBought = function (index) {
 
-    service.deleteBoughtItem = function (index) {
+            if (
+                index < 0 ||
+                index >= service.boughtItems.length
+            ) {
 
-        if (
-            index < 0 ||
-            index >= service.boughtItems.length
-        ) {
-            return;
-        }
+                return;
 
+            }
 
-        service.boughtItems.splice(index, 1);
 
+            var item =
+                service.boughtItems
+                    .splice(index, 1)[0];
 
-        service.saveData();
 
-    };
+            delete item.boughtDate;
 
 
-    /*
-    ------------------------------------------------
-    CLEAR EVERYTHING
-    ------------------------------------------------
-    */
+            service.toBuyItems.push(item);
 
-    service.clearAll = function () {
 
-        service.toBuyItems.length = 0;
+            service.saveData();
 
-        service.boughtItems.length = 0;
+        };
 
 
-        localStorage.removeItem(STORAGE_KEY);
+        /*
+        ==========================================
+        DELETE TO BUY ITEM
+        ==========================================
+        */
 
-    };
+        service.deleteToBuyItem = function (index) {
 
-}
-```
+            service.toBuyItems.splice(
+                index,
+                1
+            );
 
-})();
 
+            service.saveData();
 
-/* (function function_name(argument) {
-'use strict';
+        };
 
-angular.module('ShoppingListCheckOff', [])
-.controller('ToBuyController', ToBuyController)
-.controller('AlreadyBoughtController', AlreadyBoughtController)
-.service('ShoppingListCheckOffService', ShoppingListCheckOffService);
 
+        /*
+        ==========================================
+        DELETE BOUGHT ITEM
+        ==========================================
+        */
 
-ToBuyController.$inject = ['ShoppingListCheckOffService'];
-function ToBuyController(ShoppingListCheckOffService) {
-	var toBuyList = this;
+        service.deleteBoughtItem = function (index) {
 
-	toBuyList.items = ShoppingListCheckOffService.getItems('toBuyList');
-	
+            service.boughtItems.splice(
+                index,
+                1
+            );
 
-	toBuyList.bought = function (itemIndex, itemName, itemQuantity) {
-		ShoppingListCheckOffService.buyItem(itemIndex, itemName, itemQuantity);
-	}
 
-}
+            service.saveData();
 
+        };
 
-AlreadyBoughtController.$inject = ['ShoppingListCheckOffService'];
-function AlreadyBoughtController(ShoppingListCheckOffService) {
-	var showList = this;
 
-	showList.items = ShoppingListCheckOffService.getItems('showList');
+        /*
+        ==========================================
+        COMPLETE SHOPPING TRIP
+        ==========================================
+        */
 
-}
+        service.completeShopping = function () {
 
+            var record = {
 
-function ShoppingListCheckOffService() {
-	var service = this;
+                id:
+                    Date.now(),
 
+                completedDate:
+                    new Date().toISOString(),
 
-	var toBuyItems = [
-	{name: 'Cheese', quantity:10},
-	{name: 'Milk', quantity:2},
-	{name: 'Eggs', quantity:12},
-	{name: 'Toasts', quantity:8},
-	{name: 'Apples', quantity:10}
-	];
-	var boughtItems = [];
+                items:
+                    angular.copy(
+                        service.boughtItems
+                    )
 
-	service.buyItem = function (itemIndex, itemName, itemQuantity) {
+            };
 
-		var item = {
-			name:itemName,
-			quantity: itemQuantity
-		};
-		boughtItems.push(item);
-		toBuyItems.splice(itemIndex, 1);
-	};
 
-	service.getItems = function (whichList) {
-		if (whichList=='toBuyList') {
-			console.log(toBuyItems);
-			return toBuyItems;
-		}else{
-			return boughtItems;
-		}
-		
-	};
+            /*
+            ADD TO HISTORY
+            */
 
+            service.shoppingHistory.unshift(
+                record
+            );
 
 
-}
-*/
+            /*
+            CLEAR CURRENT LISTS
+            */
+
+            service.toBuyItems.length = 0;
+
+            service.boughtItems.length = 0;
+
+
+            service.saveData();
+
+        };
+
+
+        /*
+        ==========================================
+        DELETE HISTORY RECORD
+        ==========================================
+        */
+
+        service.deleteRecord = function (index) {
+
+            service.shoppingHistory.splice(
+                index,
+                1
+            );
+
+
+            service.saveData();
+
+        };
+
+    }
 
 })();
