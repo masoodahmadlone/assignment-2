@@ -1,115 +1,67 @@
 <!DOCTYPE html>
-
 <html lang="en" ng-app="ShoppingListCheckOff">
 
 <head>
     <meta charset="UTF-8">
 
-```
-<meta name="viewport"
-      content="width=device-width, initial-scale=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
 
-<title>My Shopping List</title>
+    <title>My Shopping List</title>
 
-<!-- Bootstrap CSS -->
-<link rel="stylesheet" href="styles/bootstrap.min.css">
+    <link rel="stylesheet" href="styles/bootstrap.min.css">
 
-<style>
-
-    body {
-        padding-top: 30px;
-        padding-bottom: 40px;
-        background: #f5f5f5;
-    }
-
-    .shopping-header {
-        text-align: center;
-        margin-bottom: 30px;
-    }
-
-    .shopping-header h1 {
-        font-weight: bold;
-    }
-
-    .add-item-box {
-        background: #ffffff;
-        padding: 20px;
-        border-radius: 6px;
-        margin-bottom: 25px;
-    }
-
-    .list-box {
-        background: #ffffff;
-        padding: 20px;
-        border-radius: 6px;
-        min-height: 300px;
-        margin-bottom: 20px;
-    }
-
-    .list-box h2 {
-        margin-top: 0;
-    }
-
-    .shopping-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 0;
-        border-bottom: 1px solid #eeeeee;
-    }
-
-    .shopping-item:last-child {
-        border-bottom: none;
-    }
-
-    .item-name {
-        font-size: 18px;
-    }
-
-    .item-quantity {
-        color: #777777;
-        margin-left: 5px;
-    }
-
-    .item-buttons {
-        white-space: nowrap;
-    }
-
-    .item-buttons button {
-        margin-left: 5px;
-    }
-
-    .empty-message {
-        text-align: center;
-        font-weight: bold;
-        color: #999999;
-        padding: 40px 10px;
-    }
-
-    .error-message {
-        color: #d9534f;
-        margin-top: 10px;
-        font-weight: bold;
-    }
-
-    .counter {
-        font-size: 14px;
-        font-weight: normal;
-    }
-
-    .bought-item {
-        text-decoration: line-through;
-        color: #777777;
-    }
-
-    @media (max-width: 767px) {
+    <style>
 
         body {
-            padding-top: 15px;
+            background: #f4f6f9;
+            padding: 25px 0 50px;
+        }
+
+        .shopping-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .shopping-header h1 {
+            font-weight: bold;
+        }
+
+        .current-date {
+            color: #777;
+            font-size: 16px;
+        }
+
+        .card-box {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.08);
+        }
+
+        .list-box {
+            min-height: 300px;
         }
 
         .shopping-item {
-            display: block;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .shopping-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-name {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .item-meta {
+            color: #777;
+            font-size: 13px;
+            margin-top: 4px;
         }
 
         .item-buttons {
@@ -117,13 +69,54 @@
         }
 
         .item-buttons button {
-            margin-left: 0;
             margin-right: 5px;
         }
-    }
 
-</style>
-```
+        .empty-message {
+            text-align: center;
+            padding: 50px 10px;
+            color: #888;
+            font-weight: bold;
+        }
+
+        .error-message {
+            color: #d9534f;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .counter {
+            font-size: 15px;
+            vertical-align: middle;
+        }
+
+        .bought-item .item-name {
+            text-decoration: line-through;
+            color: #777;
+        }
+
+        .history-item {
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 767px) {
+
+            body {
+                padding: 15px 0;
+            }
+
+            .card-box {
+                padding: 15px;
+            }
+
+        }
+
+    </style>
 
 </head>
 
@@ -132,154 +125,164 @@
 <div class="container"
      ng-controller="ShoppingController as shop">
 
-```
-<!-- Header -->
-<div class="shopping-header">
+    <!-- HEADER -->
 
-    <h1>🛒 My Shopping List</h1>
+    <div class="shopping-header">
 
-    <p>
-        Add items before shopping and mark them as bought.
-    </p>
+        <h1>🛒 My Shopping List</h1>
 
-</div>
+        <p>Add items, mark purchases, and keep your shopping history.</p>
 
-
-<!-- Add New Item -->
-<div class="add-item-box">
-
-    <h3>Add New Item</h3>
-
-    <form ng-submit="shop.addItem()">
-
-        <div class="row">
-
-            <div class="col-sm-7">
-
-                <div class="form-group">
-
-                    <label>Item Name</label>
-
-                    <input type="text"
-                           class="form-control"
-                           placeholder="Example: Milk"
-                           ng-model="shop.newItem.name">
-
-                </div>
-
-            </div>
-
-
-            <div class="col-sm-3">
-
-                <div class="form-group">
-
-                    <label>Quantity</label>
-
-                    <input type="number"
-                           min="1"
-                           class="form-control"
-                           placeholder="1"
-                           ng-model="shop.newItem.quantity">
-
-                </div>
-
-            </div>
-
-
-            <div class="col-sm-2">
-
-                <div class="form-group">
-
-                    <label>&nbsp;</label>
-
-                    <button type="submit"
-                            class="btn btn-primary form-control">
-
-                        + Add
-
-                    </button>
-
-                </div>
-
-            </div>
-
+        <div class="current-date">
+            📅 {{ shop.currentDate }}
         </div>
-
-    </form>
-
-
-    <!-- Validation Message -->
-    <div class="error-message"
-         ng-if="shop.errorMessage">
-
-        {{ shop.errorMessage }}
 
     </div>
 
-</div>
+
+    <!-- ADD ITEM -->
+
+    <div class="card-box">
+
+        <h3>Add New Item</h3>
+
+        <form ng-submit="shop.addItem()" novalidate>
+
+            <div class="row">
+
+                <div class="col-sm-7">
+
+                    <div class="form-group">
+
+                        <label>Item Name</label>
+
+                        <input type="text"
+                               class="form-control"
+                               placeholder="Example: Milk"
+                               ng-model="shop.newItem.name">
+
+                    </div>
+
+                </div>
 
 
-<!-- Shopping Lists -->
-<div class="row">
+                <div class="col-sm-3">
+
+                    <div class="form-group">
+
+                        <label>Quantity</label>
+
+                        <input type="number"
+                               min="1"
+                               class="form-control"
+                               ng-model="shop.newItem.quantity">
+
+                    </div>
+
+                </div>
 
 
-    <!-- To Buy List -->
-    <div class="col-md-6">
+                <div class="col-sm-2">
 
-        <div class="list-box">
+                    <div class="form-group">
 
-            <h2>
-                🛒 To Buy
-                <span class="badge">
-                    {{ shop.toBuyItems.length }}
-                </span>
-            </h2>
+                        <label>&nbsp;</label>
 
+                        <button type="submit"
+                                class="btn btn-primary form-control">
 
-            <div class="empty-message"
-                 ng-if="shop.toBuyItems.length === 0">
+                            + Add
 
-                🎉 Everything is bought!
+                        </button>
+
+                    </div>
+
+                </div>
 
             </div>
 
+        </form>
 
-            <div class="shopping-item"
-                 ng-repeat="item in shop.toBuyItems track by item.id">
 
-                <div>
+        <div class="error-message"
+             ng-if="shop.errorMessage">
 
-                    <span class="item-name">
+            {{ shop.errorMessage }}
+
+        </div>
+
+    </div>
+
+
+    <!-- SHOPPING LISTS -->
+
+    <div class="row">
+
+        <!-- TO BUY -->
+
+        <div class="col-md-6">
+
+            <div class="card-box list-box">
+
+                <h2>
+
+                    🛒 To Buy
+
+                    <span class="badge counter">
+                        {{ shop.toBuyItems.length }}
+                    </span>
+
+                </h2>
+
+
+                <div class="empty-message"
+                     ng-if="shop.toBuyItems.length === 0">
+
+                    🎉 Everything is bought!
+
+                </div>
+
+
+                <div class="shopping-item"
+                     ng-repeat="item in shop.toBuyItems track by item.id">
+
+                    <div class="item-name">
 
                         {{ item.name }}
 
-                    </span>
+                        <span class="text-muted">
+                            × {{ item.quantity }}
+                        </span>
 
-                    <span class="item-quantity">
-
-                        × {{ item.quantity }}
-
-                    </span>
-
-                </div>
+                    </div>
 
 
-                <div class="item-buttons">
+                    <div class="item-meta">
 
-                    <button class="btn btn-success btn-sm"
-                            ng-click="shop.markAsBought($index)">
+                        Added:
+                        {{ item.addedDate | date:'medium' }}
 
-                        ✓ Bought
+                    </div>
 
-                    </button>
 
-                    <button class="btn btn-danger btn-sm"
-                            ng-click="shop.deleteToBuyItem($index)">
+                    <div class="item-buttons">
 
-                        🗑 Delete
+                        <button class="btn btn-success btn-sm"
+                                ng-click="shop.markAsBought($index)">
 
-                    </button>
+                            ✓ Bought
+
+                        </button>
+
+
+                        <button class="btn btn-danger btn-sm"
+                                ng-click="shop.deleteToBuyItem($index)">
+
+                            Delete
+
+                        </button>
+
+                    </div>
 
                 </div>
 
@@ -287,63 +290,166 @@
 
         </div>
 
-    </div>
+
+        <!-- ALREADY BOUGHT -->
+
+        <div class="col-md-6">
+
+            <div class="card-box list-box">
+
+                <h2>
+
+                    ✓ Already Bought
+
+                    <span class="badge counter">
+                        {{ shop.boughtItems.length }}
+                    </span>
+
+                </h2>
 
 
-    <!-- Already Bought List -->
-    <div class="col-md-6">
+                <div class="empty-message"
+                     ng-if="shop.boughtItems.length === 0">
 
-        <div class="list-box">
+                    Nothing bought yet.
 
-            <h2>
-                ✓ Already Bought
-                <span class="badge">
-                    {{ shop.boughtItems.length }}
-                </span>
-            </h2>
+                </div>
 
 
-            <div class="empty-message"
-                 ng-if="shop.boughtItems.length === 0">
+                <div class="shopping-item bought-item"
+                     ng-repeat="item in shop.boughtItems track by item.id">
 
-                Nothing bought yet.
-
-            </div>
-
-
-            <div class="shopping-item"
-                 ng-repeat="item in shop.boughtItems track by item.id">
-
-                <div class="bought-item">
-
-                    <span class="item-name">
+                    <div class="item-name">
 
                         {{ item.name }}
 
-                    </span>
+                        <span class="text-muted">
+                            × {{ item.quantity }}
+                        </span>
 
-                    <span class="item-quantity">
+                    </div>
 
-                        × {{ item.quantity }}
+
+                    <div class="item-meta">
+
+                        Purchased:
+                        {{ item.boughtDate | date:'medium' }}
+
+                    </div>
+
+
+                    <div class="item-buttons">
+
+                        <button class="btn btn-warning btn-sm"
+                                ng-click="shop.undoBought($index)">
+
+                            ↩ Undo
+
+                        </button>
+
+
+                        <button class="btn btn-danger btn-sm"
+                                ng-click="shop.deleteBoughtItem($index)">
+
+                            Delete
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- COMPLETE SHOPPING TRIP -->
+
+    <div class="text-center card-box">
+
+        <h3>Complete Current Shopping</h3>
+
+        <p>
+            Save the current purchased items as a permanent shopping record.
+        </p>
+
+        <button class="btn btn-success"
+                ng-click="shop.completeShopping()"
+                ng-disabled="shop.boughtItems.length === 0">
+
+            ✓ Complete & Save Shopping Record
+
+        </button>
+
+    </div>
+
+
+    <!-- SHOPPING HISTORY -->
+
+    <div class="card-box">
+
+        <h2>
+            📋 Shopping History
+
+            <span class="badge">
+                {{ shop.shoppingHistory.length }}
+            </span>
+        </h2>
+
+
+        <div class="empty-message"
+             ng-if="shop.shoppingHistory.length === 0">
+
+            No completed shopping records yet.
+
+        </div>
+
+
+        <div class="history-item"
+             ng-repeat="record in shop.shoppingHistory track by record.id">
+
+            <div class="row">
+
+                <div class="col-sm-8">
+
+                    <strong>
+                        Shopping Date:
+                        {{ record.completedDate | date:'fullDate' }}
+                    </strong>
+
+                    <br>
+
+                    <span class="text-muted">
+
+                        Completed:
+                        {{ record.completedDate | date:'mediumTime' }}
+
+                        |
+
+                        {{ record.items.length }} item(s)
 
                     </span>
 
                 </div>
 
 
-                <div class="item-buttons">
+                <div class="col-sm-4 text-right">
 
-                    <button class="btn btn-warning btn-sm"
-                            ng-click="shop.undoBought($index)">
+                    <button class="btn btn-primary btn-sm"
+                            ng-click="shop.downloadPDF(record)">
 
-                        ↩ Undo
+                        📄 Save as PDF
 
                     </button>
 
-                    <button class="btn btn-danger btn-sm"
-                            ng-click="shop.deleteBoughtItem($index)">
 
-                        🗑 Delete
+                    <button class="btn btn-danger btn-sm"
+                            ng-click="shop.deleteRecord($index)">
+
+                        Delete Record
 
                     </button>
 
@@ -355,34 +461,21 @@
 
     </div>
 
-</div>
 
+    <!-- JAVASCRIPT -->
 
-<!-- Clear All -->
-<div class="text-center">
+    <!-- AngularJS must load FIRST -->
+    <script src="angular.min.js"></script>
 
-    <button class="btn btn-default"
-            ng-click="shop.clearAll()"
-            ng-if="shop.toBuyItems.length > 0 || shop.boughtItems.length > 0">
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-        Clear Entire Shopping List
-
-    </button>
-
-</div>
-
-
-<!-- AngularJS -->
-<script src="angular.min.js"></script>
-
-<!-- Application -->
-<script src="app.js"></script>
-```
+    <!-- Your application -->
+    <script src="app.js"></script>
 
 </body>
 
 </html>
-
 <!-- <!doctype html>
 <html lang="en" ng-app='ShoppingListCheckOff'>
   <head>
